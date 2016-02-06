@@ -67,8 +67,11 @@
     <Compile Include="Actors\Impl\MessageWriterTests.cs" />
     <Compile Include="Actors\Impl\StructSizeCounterTests.cs" />
     <Compile Include="Actors\Impl\ActorRegistryTestsBase.cs" />
+    <Compile Include="Actors\OneSegmentOnlyPool.cs" />
+    <Compile Include="Actors\Timer\SchedulerTests.cs" />
     <Compile Include="Buffers\IndexCalculatorTests.cs" />
     <Compile Include="Buffers\StreamTests.cs" />
+    <Compile Include="Actors\GuidMessageWriter.cs" />
     <Compile Include="PerformanceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ring\ManyToOneBufferTests.cs" />

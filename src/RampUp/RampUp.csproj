@@ -66,6 +66,9 @@
     <Compile Include="Actors\Impl\IStructSizeCounter.cs" />
     <Compile Include="Actors\Impl\MessageReader.cs" />
     <Compile Include="Actors\Impl\StructSizeCounter.cs" />
+    <Compile Include="Actors\Timer\Impl\Messages.cs" />
+    <Compile Include="Actors\Timer\IScheduler.cs" />
+    <Compile Include="Actors\Timer\Impl\Scheduler.cs" />
     <Compile Include="Atomics\AtomicInt.cs" />
     <Compile Include="Atomics\AtomicLong.cs" />
     <Compile Include="Atomics\IAtomicInt.cs" />
