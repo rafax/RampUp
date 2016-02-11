@@ -72,6 +72,7 @@
     <Compile Include="Buffers\IndexCalculatorTests.cs" />
     <Compile Include="Buffers\StreamTests.cs" />
     <Compile Include="Actors\GuidMessageWriter.cs" />
+    <Compile Include="MethodReplacer.cs" />
     <Compile Include="PerformanceTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ring\ManyToOneBufferTests.cs" />
@@ -84,7 +85,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Content Include="FodyWeavers.xml" />

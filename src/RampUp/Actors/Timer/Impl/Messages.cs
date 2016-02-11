@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace RampUp.Actors.Timer.Impl
 {
@@ -7,12 +8,12 @@ namespace RampUp.Actors.Timer.Impl
         public struct RegisterTimeout
         {
             public readonly long Id;
-            public readonly TimeSpan Timeout;
+            public readonly long AbstoluteTicks;
 
             public RegisterTimeout(long id, TimeSpan timeout)
             {
                 Id = id;
-                Timeout = timeout;
+                AbstoluteTicks = timeout.Ticks + Stopwatch.GetTimestamp();
             }
         }
 
