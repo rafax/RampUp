@@ -3,7 +3,7 @@ using System.Linq;
 using NSubstitute;
 using NUnit.Framework;
 using RampUp.Actors;
-using RampUp.Actors.Timer.Impl;
+using RampUp.Actors.Time.Impl;
 using RampUp.Buffers;
 
 namespace RampUp.Tests.Actors.Timer
@@ -41,7 +41,7 @@ namespace RampUp.Tests.Actors.Timer
             Assert.AreEqual(Timeout, register.Timeout);
 
             var e = new Envelope();
-            var timeout = new Messages.TimeoutOccured(register.Id);
+            var timeout = new Messages.TimerTickOccured(register.Id);
 
             // invoke timeout
             scheduler.Handle(ref e, ref timeout);
