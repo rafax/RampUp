@@ -1,4 +1,6 @@
 ﻿using System;
+using CodeCop.Core;
+using CodeCop.Core.Fluent;
 using NSubstitute;
 using NUnit.Framework;
 using RampUp.Atomics;
@@ -26,6 +28,57 @@ namespace RampUp.Tests.Ring
         private static readonly IntPtr HeadCounterCache = new IntPtr(HeadCounterCacheIndex);
         private Mocks.IAtomicLong _atomicLong;
         private Mocks.IAtomicInt _atomicInt;
+
+        public ManyToOneBufferTests()
+        {
+            Cop.AsFluent();
+
+            // long
+            var l = typeof(AtomicLong);
+            l.GetMethod("Read").Override(c => Mocks.AtomicLong.Read(GetAtomicLongPtr(c)));
+            l.GetMethod("Write").Override(c =>
+            {
+                Mocks.AtomicLong.Write(GetAtomicLongPtr(c), (long) c.Parameters[1].Value);
+                return null;
+            });
+            l.GetMethod("VolatileRead").Override(c => Mocks.AtomicLong.VolatileRead(GetAtomicLongPtr(c)));
+            l.GetMethod("VolatileWrite").Override(c =>
+            {
+                Mocks.AtomicLong.VolatileWrite(GetAtomicLongPtr(c), (long) c.Parameters[0].Value);
+                return null;
+            });
+            l.GetMethod("CompareExchange").Override(c => Mocks.AtomicLong.CompareExchange(GetAtomicLongPtr(c), (long)c.Parameters[0].Value, (long)c.Parameters[1].Value));
+
+            // int
+            var i = typeof(AtomicInt);
+            i.GetMethod("Read").Override(c => Mocks.AtomicInt.Read(GetAtomicIntPtr(c)));
+            i.GetMethod("Write").Override(c =>
+            {
+                Mocks.AtomicInt.Write(GetAtomicIntPtr(c), (int)c.Parameters[1].Value);
+                return null;
+            });
+            i.GetMethod("VolatileRead").Override(c => Mocks.AtomicInt.VolatileRead(GetAtomicIntPtr(c)));
+            i.GetMethod("VolatileWrite").Override(c =>
+            {
+                Mocks.AtomicInt.VolatileWrite(GetAtomicIntPtr(c), (int)c.Parameters[0].Value);
+                return null;
+            });
+            i.GetMethod("CompareExchange").Override(c => Mocks.AtomicInt.CompareExchange(GetAtomicIntPtr(c), (int)c.Parameters[0].Value, (int)c.Parameters[1].Value));
+
+            Cop.Intercept();
+        }
+
+        private static IntPtr GetAtomicLongPtr(InterceptionContext c)
+        {
+            var atomicLong = (AtomicLong) c.Sender;
+            return (IntPtr) (*(long*)&atomicLong);
+        }
+
+        private static IntPtr GetAtomicIntPtr(InterceptionContext c)
+        {
+            var atomicLong = (AtomicInt)c.Sender;
+            return (IntPtr)(*(int*)&atomicLong);
+        }
 
         [SetUp]
         public void SetUp()
