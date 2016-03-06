@@ -40,15 +40,16 @@ namespace RampUp.Actors.Impl
             var current = head;
             while (current != null)
             {
-                var firstAvailablePosition = *(long*)current->Buffer;
+                var firstAvailablePosition = *(long*) current->Buffer;
                 var offset = SegmentHeaderSize;
                 while (offset < firstAvailablePosition)
                 {
                     var header = current->Buffer + offset;
                     var messageHeader = (Header*) header;
-                    handler(messageHeader->MessageTypeId, new ByteChunk(header + sizeof (Header), messageHeader->Chunk1Length + messageHeader->Chunk2Length));
+                    handler(messageHeader->MessageTypeId,
+                        new ByteChunk(header + sizeof (Header), messageHeader->ChunkLength));
 
-                    offset += sizeof (Header) + messageHeader->Chunk1Length + messageHeader->Chunk2Length;
+                    offset += GetNeededBytes(messageHeader->ChunkLength);
                 }
 
                 current = current->Next;
@@ -57,18 +58,18 @@ namespace RampUp.Actors.Impl
             _pool.Push(head);
         }
 
-        private bool Write(int messagetypeid, ByteChunk chunk, ByteChunk chunk2)
+        private bool Write(int messagetypeid, ByteChunk chunk)
         {
-            var neededBytes = (sizeof (Header) + chunk.Length + chunk2.Length).AlignToMultipleOf(sizeof (long));
+            var neededBytes = GetNeededBytes(chunk.Length);
             var tail = _currentHead->Tail;
-            
+
             // ReSharper disable once ConvertIfStatementToNullCoalescingExpression
             if (tail == null)
             {
                 tail = _currentHead;
             }
 
-            if (TryWriteToSegment(messagetypeid, chunk, chunk2, tail, neededBytes))
+            if (TryWriteToSegment(messagetypeid, chunk, tail, neededBytes))
             {
                 return true;
             }
@@ -76,7 +77,12 @@ namespace RampUp.Actors.Impl
             // no write, pop new segment
             tail->Next = PopNew();
 
-            return TryWriteToSegment(messagetypeid, chunk, chunk2, tail->Next, neededBytes);
+            return TryWriteToSegment(messagetypeid, chunk, tail->Next, neededBytes);
+        }
+
+        private static int GetNeededBytes(int length)
+        {
+            return (sizeof (Header) + length).AlignToMultipleOf(sizeof (long));
         }
 
         private Segment* PopNew()
@@ -86,7 +92,7 @@ namespace RampUp.Actors.Impl
             return h;
         }
 
-        private bool TryWriteToSegment(int messagetypeid, ByteChunk chunk, ByteChunk chunk2, Segment* segment,
+        private bool TryWriteToSegment(int messagetypeid, ByteChunk chunk, Segment* segment,
             int neededBytes)
         {
             var firstAvailablePosition = (long*) segment->Buffer;
@@ -94,15 +100,11 @@ namespace RampUp.Actors.Impl
             if (*firstAvailablePosition + neededBytes <= _segmentLength)
             {
                 var buffer = segment->Buffer + *firstAvailablePosition;
-                ByteChunk chunk1 = chunk;
-                ByteChunk chunk3 = chunk2;
                 var header = (Header*) buffer;
                 header->MessageTypeId = messagetypeid;
-                header->Chunk1Length = (short) chunk1.Length;
-                header->Chunk2Length = (short) chunk3.Length;
+                header->ChunkLength = chunk.Length;
 
-                Native.MemcpyUnmanaged(buffer + sizeof (Header), chunk1.Pointer, chunk1.Length);
-                Native.MemcpyUnmanaged(buffer + sizeof (Header) + chunk1.Length, chunk3.Pointer, chunk3.Length);
+                Native.MemcpyUnmanaged(buffer + sizeof (Header), chunk.Pointer, chunk.Length);
                 *firstAvailablePosition += neededBytes;
 
                 return true;
@@ -115,8 +117,7 @@ namespace RampUp.Actors.Impl
         private struct Header
         {
             [FieldOffset(0)] public int MessageTypeId;
-            [FieldOffset(4)] public short Chunk1Length;
-            [FieldOffset(6)] public short Chunk2Length;
+            [FieldOffset(4)] public int ChunkLength;
         }
     }
 }

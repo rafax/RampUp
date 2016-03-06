@@ -20,9 +20,8 @@ namespace RampUp.Tests.Actors
 
             var guid = (Guid) ((object) message);
 
-            var ch1 = new ByteChunk((byte*) &guid, 8);
-            var ch2 = new ByteChunk(((byte*) &guid) + 8, 8);
-            return write(MessageId, ch1, ch2);
+            var ch1 = new ByteChunk((byte*) &guid, 16);
+            return write(MessageId, ch1);
         }
     }
 }

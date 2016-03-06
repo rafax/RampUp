@@ -16,6 +16,7 @@ namespace RampUp.Tests.Actors.Timer
         [Test]
         public unsafe void Test()
         {
+            var actorId =new ActorId(34);
             var bytes = stackalloc byte[SegmentLength];
             var segment = new Segment(bytes, SegmentLength);
 
@@ -25,7 +26,7 @@ namespace RampUp.Tests.Actors.Timer
 
             var message = Guid.NewGuid();
             var called = false;
-            var scheduler = new Scheduler(bus, pool, new GuidMessageWriter(), (msgId, chunk) =>
+            var scheduler = new Scheduler(actorId, bus, pool, new GuidMessageWriter(), (msgId, chunk) =>
             {
                 Assert.AreEqual(GuidMessageWriter.MessageId, msgId);
                 Assert.AreEqual(GuidMessageWriter.ChunkLength, chunk.Length);

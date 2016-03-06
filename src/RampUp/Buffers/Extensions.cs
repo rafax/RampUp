@@ -19,3 +19,5 @@ namespace RampUp.Buffers
 
             return result;
         }
+    }
+}
